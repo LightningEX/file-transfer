@@ -1,6 +1,7 @@
 # Secure File Transfer
 
 A simple, secure way to transfer files with password protection. Upload a file, set a password, share the code with someone, and they can download it by entering the correct password. Files are automatically deleted after 24 hours or after successful download.
+
 Find the page here: https://file-transfer-opal.vercel.app/
 
 ## Features
