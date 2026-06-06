@@ -10,7 +10,7 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // In-memory storage (for Vercel, use a proper database in production)
-// Format: { code: { passwordHash, filename, filepath, createdAt, expiresAt, firstDownloadTime, deleteTimeout } }
+// Format: { code: { passwordHash, filename, filepath, createdAt, expiresAt, firstDownloadTime, deleteAt } }
 const fileStorage = new Map();
 
 // Cleanup interval - delete expired files every 5 minutes
@@ -98,7 +98,7 @@ app.post('/api/upload', (req, res) => {
                 createdAt: Date.now(),
                 expiresAt,
                 firstDownloadTime: null,
-                deleteTimeout: null
+                deleteAt: null
             });
 
             res.json({ code });
@@ -129,7 +129,7 @@ app.post('/api/download', async (req, res) => {
             return res.status(404).json({ error: 'File not found or expired' });
         }
 
-        // Check if file has expired
+        // Check if file has expired (24 hour limit)
         if (Date.now() > fileInfo.expiresAt) {
             fileStorage.delete(code);
             // Delete physical file
@@ -137,6 +137,16 @@ app.post('/api/download', async (req, res) => {
                 fs.unlinkSync(fileInfo.filepath);
             }
             return res.status(404).json({ error: 'File has expired' });
+        }
+
+        // Check if file has been marked for deletion (3 minute window expired)
+        if (fileInfo.deleteAt !== null && Date.now() > fileInfo.deleteAt) {
+            fileStorage.delete(code);
+            // Delete physical file
+            if (fs.existsSync(fileInfo.filepath)) {
+                fs.unlinkSync(fileInfo.filepath);
+            }
+            return res.status(404).json({ error: 'Download link has expired' });
         }
 
         // Verify password
@@ -151,18 +161,10 @@ app.post('/api/download', async (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
-        // Set first download time if this is the first download
+        // Set first download time and schedule deletion if this is the first verification
         if (fileInfo.firstDownloadTime === null) {
             fileInfo.firstDownloadTime = Date.now();
-            
-            // Schedule deletion 3 minutes after first download
-            if (fileInfo.deleteTimeout) {
-                clearTimeout(fileInfo.deleteTimeout);
-            }
-            
-            fileInfo.deleteTimeout = setTimeout(() => {
-                scheduleFileDeletion(code);
-            }, 3 * 60 * 1000); // 3 minutes
+            fileInfo.deleteAt = Date.now() + (3 * 60 * 1000); // 3 minutes from now
         }
 
         // Read file and create download link
@@ -193,13 +195,22 @@ app.get('/api/download-file/:code/:encodedFilename', (req, res) => {
             return res.status(404).json({ error: 'File not found' });
         }
 
+        // Check if deletion window has expired
+        if (fileInfo.deleteAt !== null && Date.now() > fileInfo.deleteAt) {
+            fileStorage.delete(code);
+            if (fs.existsSync(fileInfo.filepath)) {
+                fs.unlinkSync(fileInfo.filepath);
+            }
+            return res.status(404).json({ error: 'Download link has expired' });
+        }
+
         // Check if file exists
         if (!fs.existsSync(fileInfo.filepath)) {
             fileStorage.delete(code);
             return res.status(404).json({ error: 'File not found' });
         }
 
-        // Send file (don't delete it here - deletion happens via timeout)
+        // Send file (don't delete it here - deletion happens on cleanup)
         res.download(fileInfo.filepath, fileInfo.filename, (err) => {
             if (err) {
                 console.error('Download error:', err);
@@ -212,41 +223,19 @@ app.get('/api/download-file/:code/:encodedFilename', (req, res) => {
 });
 
 /**
- * Schedule file deletion 3 minutes after first download
- */
-function scheduleFileDeletion(code) {
-    const fileInfo = fileStorage.get(code);
-    if (fileInfo) {
-        fileStorage.delete(code);
-        // Delete physical file
-        if (fs.existsSync(fileInfo.filepath)) {
-            try {
-                fs.unlinkSync(fileInfo.filepath);
-                console.log(`File deleted for code: ${code}`);
-            } catch (error) {
-                console.error('Error deleting file:', error);
-            }
-        }
-    }
-}
-
-/**
  * Cleanup expired files
  */
 function cleanupExpiredFiles() {
     const now = Date.now();
     for (const [code, fileInfo] of fileStorage.entries()) {
-        if (now > fileInfo.expiresAt) {
-            // Clear timeout if exists
-            if (fileInfo.deleteTimeout) {
-                clearTimeout(fileInfo.deleteTimeout);
-            }
-            
+        // Check if 24-hour expiration has passed OR 3-minute deletion window has passed
+        if (now > fileInfo.expiresAt || (fileInfo.deleteAt !== null && now > fileInfo.deleteAt)) {
             fileStorage.delete(code);
             // Delete physical file
             if (fs.existsSync(fileInfo.filepath)) {
                 try {
                     fs.unlinkSync(fileInfo.filepath);
+                    console.log(`File cleaned up for code: ${code}`);
                 } catch (error) {
                     console.error('Error deleting file:', error);
                 }
