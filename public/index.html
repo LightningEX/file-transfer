@@ -268,6 +268,36 @@
         .download-btn:hover {
             background: #218838;
         }
+
+        .download-link {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .download-link a {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: 600;
+            transition: all 0.3s;
+            margin-bottom: 10px;
+        }
+
+        .download-link a:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .countdown {
+            font-size: 12px;
+            color: #666;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -336,6 +366,12 @@
                 <div id="downloadLoading" class="loading">
                     <div class="spinner"></div>
                     <p>Verifying password...</p>
+                </div>
+
+                <div id="downloadLink" class="download-link">
+                    <p style="margin-bottom: 10px; color: #333; font-weight: 600;">✅ File ready to download!</p>
+                    <a id="downloadLinkElement" href="#" download>📥 Download File</a>
+                    <div class="countdown">Link will be available for <span id="countdown">3</span> seconds</div>
                 </div>
             </div>
         </div>
@@ -432,7 +468,7 @@
                         <p>Share this code with the recipient:</p>
                         <div class="share-code">${data.code}</div>
                         <button class="copy-btn" onclick="copyToClipboard('${data.code}')">📋 Copy Code</button>
-                        <p style="margin-top: 20px; color: #666; font-size: 12px;">The file will be automatically deleted after 24 hours or after successful download.</p>
+                        <p style="margin-top: 20px; color: #666; font-size: 12px;">The file will be automatically deleted 3 minutes after successful download or after 24 hours.</p>
                     </div>
                 `;
                 success.style.display = 'block';
@@ -496,21 +532,52 @@
                 link.download = data.filename;
                 link.click();
 
+                // Show download link after 3 seconds
                 loading.style.display = 'none';
-                showMessage(message, 'File downloaded successfully! The file and password have been deleted.', 'success');
-
-                // Reset form
-                setTimeout(() => {
-                    document.getElementById('shareCode').value = '';
-                    document.getElementById('downloadPassword').value = '';
-                    form.style.display = 'block';
-                }, 2000);
+                showDownloadLink(data.downloadUrl, data.filename);
 
             } catch (error) {
                 loading.style.display = 'none';
                 form.style.display = 'block';
                 showMessage(message, error.message, 'error');
             }
+        }
+
+        function showDownloadLink(downloadUrl, filename) {
+            const downloadLinkDiv = document.getElementById('downloadLink');
+            const downloadLinkElement = document.getElementById('downloadLinkElement');
+            const countdownElement = document.getElementById('countdown');
+            const message = document.getElementById('downloadMessage');
+
+            downloadLinkElement.href = downloadUrl;
+            downloadLinkElement.download = filename;
+            
+            // Show after 3 seconds
+            setTimeout(() => {
+                downloadLinkDiv.style.display = 'block';
+                showMessage(message, 'File ready for download! You can download it again within the next 3 minutes.', 'info');
+                
+                // Start countdown from 180 seconds (3 minutes)
+                let timeRemaining = 180;
+                countdownElement.textContent = timeRemaining;
+                
+                const countdownInterval = setInterval(() => {
+                    timeRemaining--;
+                    countdownElement.textContent = timeRemaining;
+                    
+                    if (timeRemaining <= 0) {
+                        clearInterval(countdownInterval);
+                        downloadLinkDiv.style.display = 'none';
+                        showMessage(message, 'Download link has expired. Please verify the code and password again.', 'error');
+                    }
+                }, 1000);
+            }, 3000);
+
+            // Reset form after showing link
+            setTimeout(() => {
+                document.getElementById('shareCode').value = '';
+                document.getElementById('downloadPassword').value = '';
+            }, 5000);
         }
 
         function showMessage(element, text, type) {
