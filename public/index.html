@@ -19,6 +19,68 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        }
+
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "☀️";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+
+        input:checked + .slider:before {
+            content: "🌙";
+            transform: translateX(26px);
         }
 
         .container {
@@ -28,6 +90,12 @@
             max-width: 500px;
             width: 100%;
             overflow: hidden;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        body.dark-mode .container {
+            background: #1e1e2e;
+            color: #e0e0e0;
         }
 
         .header {
@@ -35,6 +103,11 @@
             color: white;
             padding: 30px;
             text-align: center;
+            transition: background 0.3s ease;
+        }
+
+        body.dark-mode .header {
+            background: linear-gradient(135deg, #0f3460 0%, #16213e 100%);
         }
 
         .header h1 {
@@ -70,6 +143,12 @@
             color: #666;
         }
 
+        body.dark-mode .tab-btn {
+            background: #2a2a3e;
+            border-color: #404050;
+            color: #b0b0b0;
+        }
+
         .tab-btn.active {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -94,6 +173,11 @@
             font-weight: 600;
             color: #333;
             font-size: 14px;
+            transition: color 0.3s ease;
+        }
+
+        body.dark-mode label {
+            color: #e0e0e0;
         }
 
         input[type="file"],
@@ -104,7 +188,17 @@
             border: 2px solid #e0e0e0;
             border-radius: 5px;
             font-size: 14px;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, background-color 0.3s, color 0.3s;
+            background-color: white;
+            color: #333;
+        }
+
+        body.dark-mode input[type="file"],
+        body.dark-mode input[type="password"],
+        body.dark-mode input[type="text"] {
+            background-color: #2a2a3e;
+            border-color: #404050;
+            color: #e0e0e0;
         }
 
         input[type="file"]:focus,
@@ -137,8 +231,18 @@
             color: #667eea;
         }
 
+        body.dark-mode .file-label {
+            background: #2a2a3e;
+            border-color: #667eea;
+            color: #7b9aff;
+        }
+
         .file-label:hover {
             background: #f0f0ff;
+        }
+
+        body.dark-mode .file-label:hover {
+            background: #333347;
         }
 
         .file-name {
@@ -148,6 +252,12 @@
             border-radius: 5px;
             font-size: 14px;
             color: #666;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode .file-name {
+            background: #2a2a3e;
+            color: #b0b0b0;
         }
 
         button {
@@ -193,11 +303,23 @@
             display: block;
         }
 
+        body.dark-mode .message.success {
+            background: #1b5e20;
+            color: #81c784;
+            border: 1px solid #2e7d32;
+        }
+
         .message.error {
             background: #f8d7da;
             color: #721c24;
             border: 1px solid #f5c6cb;
             display: block;
+        }
+
+        body.dark-mode .message.error {
+            background: #b71c1c;
+            color: #ef5350;
+            border: 1px solid #c62828;
         }
 
         .message.info {
@@ -207,10 +329,20 @@
             display: block;
         }
 
+        body.dark-mode .message.info {
+            background: #01579b;
+            color: #81d4fa;
+            border: 1px solid #0277bd;
+        }
+
         .loading {
             display: none;
             text-align: center;
             color: #667eea;
+        }
+
+        body.dark-mode .loading {
+            color: #7b9aff;
         }
 
         .spinner {
@@ -221,6 +353,11 @@
             height: 30px;
             animation: spin 1s linear infinite;
             margin: 0 auto 10px;
+        }
+
+        body.dark-mode .spinner {
+            border: 3px solid #404050;
+            border-top: 3px solid #7b9aff;
         }
 
         @keyframes spin {
@@ -238,6 +375,10 @@
             font-size: 18px;
         }
 
+        body.dark-mode .success-content h3 {
+            color: #81c784;
+        }
+
         .share-code {
             background: #f5f5f5;
             padding: 15px;
@@ -248,6 +389,12 @@
             color: #333;
             margin: 15px 0;
             font-size: 16px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        body.dark-mode .share-code {
+            background: #2a2a3e;
+            color: #e0e0e0;
         }
 
         .copy-btn {
@@ -297,10 +444,23 @@
             font-size: 12px;
             color: #666;
             margin-top: 10px;
+            transition: color 0.3s;
+        }
+
+        body.dark-mode .countdown {
+            color: #b0b0b0;
         }
     </style>
 </head>
 <body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle">
+        <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider"></span>
+        </label>
+    </div>
+
     <div class="container">
         <div class="header">
             <h1>🔒 Secure File Transfer</h1>
@@ -378,6 +538,26 @@
     </div>
 
     <script>
+        // Initialize dark mode from localStorage
+        function initializeDarkMode() {
+            const isDarkMode = localStorage.getItem('darkMode') === 'true';
+            const themeToggle = document.getElementById('themeToggle');
+            
+            if (isDarkMode) {
+                document.body.classList.add('dark-mode');
+                themeToggle.checked = true;
+            }
+        }
+
+        // Dark mode toggle listener
+        document.getElementById('themeToggle').addEventListener('change', function() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Initialize on page load
+        window.addEventListener('DOMContentLoaded', initializeDarkMode);
+
         // Drag and drop functionality
         const fileInput = document.getElementById('fileInput');
         const fileLabel = document.querySelector('.file-label');
@@ -468,7 +648,7 @@
                         <p>Share this code with the recipient:</p>
                         <div class="share-code">${data.code}</div>
                         <button class="copy-btn" onclick="copyToClipboard('${data.code}')">📋 Copy Code</button>
-                        <p style="margin-top: 20px; color: #666; font-size: 12px;">The file will be automatically deleted 3 minutes after successful download or after 24 hours.</p>
+                        <p style="margin-top: 20px; color: #666; font-size: 12px;">The file will be automatically deleted after 24 hours or after successful download.</p>
                     </div>
                 `;
                 success.style.display = 'block';
