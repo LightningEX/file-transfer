@@ -142,7 +142,7 @@ Currently, no environment variables are required. The app uses port 3000 by defa
 
 ## License
 
-MIT License - see LICENSE file for details
+MIT License - see [https://github.com/LightningEX/file-transfer/blob/main/LICENSE](LICENSE) file for details
 
 ## Contributing
 
