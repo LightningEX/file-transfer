@@ -52,7 +52,7 @@ That's it! Your file transfer app is now live.
 2. Select a file (up to 100MB)
 3. Enter a password
 4. Click "Upload & Generate Code"
-5. Share the generated code with the recipient
+5. Share the generated code and the set password with the recipient
 
 ### For the Recipient:
 1. Click "Download File"
